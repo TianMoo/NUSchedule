@@ -1,5 +1,7 @@
 package main.java;
-
+import java.io.File;
+import java.io.IOException;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -8,6 +10,30 @@ public class UI {
     private static ArrayList<Module> modules = new ArrayList<>();
 
     public static void main(String[] args) {
+        File moduleSave = new File("C:\\Users\\Public\\Documents\\NUSchedule\\moduleSave.txt");
+        try {
+            if (moduleSave.createNewFile()){
+                System.out.println("Your chosen modules will be saved at " + moduleSave.getPath());
+            } else {
+                System.out.println("Loading your saved modules saved at " + moduleSave.getPath());
+
+                Scanner Reader = new Scanner(moduleSave);
+                while (Reader.hasNextLine()){
+                    String md = Reader.nextLine();
+                    String[] InfoOfMd = md.split(" ");
+                    String ModuleCode = InfoOfMd[0];
+                    String PreferredTime = InfoOfMd[1];
+                    int Priority = Integer.parseInt(InfoOfMd[2]);
+                    AddModule(ModuleCode, PreferredTime, Priority);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error has occurred.");
+            e.printStackTrace();
+        }
+
+
+
         Scanner scan = new Scanner(System.in);
 
         System.out.print("Hello! What can I do for ya?\n");
@@ -37,9 +63,18 @@ public class UI {
                 String ModuleCode = scan.nextLine();
                 isDeleted = DeleteModule(ModuleCode);
                 if (isDeleted) System.out.println("Successfully deleted!");
+
              } else if (chooseFunction.equals("bye")) {
                 System.out.print("Thank you for using! Bye-bye.\n");
                 return;
+
+            } else if (chooseFunction.equals("save")){
+                if(SaveModule(moduleSave)){
+                    System.out.println("Your modules has been saved.");
+                }else {
+                    System.out.println("An error occurred when saving.");
+                }
+
             } else {
                 System.out.print("I don't understand what you're saying.\n");
             }
@@ -77,9 +112,24 @@ public class UI {
             System.out.println( ModuleCode + " is not found!");
             return false;
         }
-
     }
 
+    public static boolean SaveModule(File moduleSave) {
+        try{
+            FileWriter fileWriter = new FileWriter(moduleSave);
+            for (int i = 0; i < modules.size(); i++) {
+                String ModuleCode = modules.get(i).getModuleCode();
+                String TimeSlots = modules.get(i).getTimeSlots();
+                String Priority = Integer.toString(modules.get(i).getPriority());
+                fileWriter.write(ModuleCode + " " + TimeSlots + " " + Priority + "\n");
+            }
 
+            fileWriter.close();
+            return true;
+
+        } catch(IOException e) {
+            return false;
+        }
+    }
 }
 
